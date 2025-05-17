@@ -1,4 +1,4 @@
-def concat(recording, output_path, embed_logo):
+def concat(recording, output_path, donot_embed_logo):
     from .models import get_file_path
     from subprocess import check_output
     import uuid
@@ -41,6 +41,7 @@ def concat(recording, output_path, embed_logo):
     try:
         cmd = 'ffmpeg -f concat -safe 0 -i {} -c copy {}'.format(filename, output_path).split(' ')
         check_output(cmd)
+        recording.file = output_path
         os.remove(filename)
     except:
         try:
@@ -50,13 +51,11 @@ def concat(recording, output_path, embed_logo):
 #    cmd = 'ffmpeg -i {} -crf 1 -c:v libx264 {}.mp4'.format(filename, output_path).split(' ')
 #    check_output(cmd)
 #    os.remove(output_path)
-    if camera.embed_logo and embed_logo:
-        output_path = str(output_path) + ''
-        new_video_path = output_path.split('.')[0] + '-2.mp4'
-        ret_path = add_logo_to_video(output_path, new_video_path, recording.user)
-        os.remove(output_path)
-        recording.file = ret_path
-    else: recording.file = output_path
+    if camera.embed_logo and (not donot_embed_logo):
+        new_video_path = recording.file.path.split('.')[0] + '-2.mp4'
+        ret_path = add_logo_to_video(recording.file.path, new_video_path, recording.user)
+        os.remove(recording.file.path)
+        recording.file = new_video_path
     if camera.adjust_pitch and camera.name == 'private' and camera.user.profile.vendor:
         op_path = os.path.join(settings.MEDIA_ROOT, get_file_path(frame, 'frame.mp4'))
         from live.voice_changer import adjust_video_pitch

@@ -348,7 +348,7 @@ def send_text(text):
 reminders = ['first','second','third']
 
 @app.task
-def process_recording(id, embed_logo):
+def process_recording(id, donot_embed_logo):
     from live.concat import concat
     from audio.transcription import get_transcript
     from audio.fingerprinting import save_fingerprint, is_in_database
@@ -375,7 +375,7 @@ def process_recording(id, embed_logo):
                 print(traceback.format_exc())
         recording.save()
         path = os.path.join(settings.BASE_DIR, 'media', get_file_path(recording, 'file.mp4'))
-        recording.file = concat(recording, path, embed_logo)
+        recording.file = concat(recording, path, donot_embed_logo)
         try:
             run_command('sudo chmod 777 ' + str(recording.file.path))
         except: pass
@@ -438,7 +438,7 @@ def process_recording(id, embed_logo):
         recording.processed = True
         recording.public = not recording.frames.filter(public=False).last()
         recording.save()
-        for frame in recording.frames.all(): frame.delete_video()
+#        for frame in recording.frames.all(): frame.delete_video()
 
 @app.task
 def process_recordings():
@@ -448,7 +448,7 @@ def process_recordings():
     for recording in VideoRecording.objects.filter(processed=False, last_frame__lte=timezone.now() - datetime.timedelta(seconds=60)).order_by('-last_frame'):
         camera = VideoCamera.objects.filter(user=recording.user, name=recording.camera).order_by('-last_frame').first()
         try:
-            process_recording(recording.id, camera.embed_logo)
+            process_recording(recording.id, not camera.embed_logo)
         except:
             import traceback
             print(traceback.format_exc())
@@ -458,7 +458,7 @@ def process_single_recording():
     from live.models import VideoRecording, VideoCamera
     import datetime
     from django.utils import timezone
-    for recording in VideoRecording.objects.filter(processed=False, last_frame__lte=timezone.now() - datetime.timedelta(seconds=60)).order_by('-last_frame'):
+    for recording in VideoRecording.objects.filter(processed=False, last_frame__lte=timezone.now() - datetime.timedelta(seconds=(settings.LIVE_INTERVAL/1000) * 2)).order_by('-last_frame'):
         camera = VideoCamera.objects.filter(user=recording.user, name=recording.camera).order_by('-last_frame').first()
         try:
             process_recording(recording.id, camera.embed_logo)
