@@ -55,7 +55,7 @@ def concat(recording, output_path, donot_embed_logo):
         new_video_path = recording.file.path.split('.')[0] + '-2.mp4'
         ret_path = add_logo_to_video(recording.file.path, new_video_path, recording.user)
         os.remove(recording.file.path)
-        recording.file = new_video_path
+        recording.file = ret_path
     if camera.adjust_pitch and camera.name == 'private' and camera.user.profile.vendor:
         op_path = os.path.join(settings.MEDIA_ROOT, get_file_path(frame, 'frame.mp4'))
         from live.voice_changer import adjust_video_pitch

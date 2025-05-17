@@ -100,8 +100,6 @@ def update_camera(user_id, camera_user, camera_name, camera_data, donot_embed_lo
             print(recording.last_frame)
             recording = VideoRecording.objects.create(user=camera.user, camera=camera.name, last_frame=timestamp, compressed=camera.user.vendor_profile.compress_video)
             recording.save()
-    if not camera.recording or is_frame_still:
-        delay_remove_frame.apply_async([frame.id], countdown=(settings.LIVE_INTERVAL/1000) * 16)
     camera.mime = frame.frame.name.split('.')[1]
     camera.frames.add(frame)
     camera.frame_count = camera.frames.count()
@@ -112,6 +110,8 @@ def update_camera(user_id, camera_user, camera_name, camera_data, donot_embed_lo
         recording.save()
         print('recording')
         process_recording.apply_async([recording.id, donot_embed_logo], countdown=(settings.LIVE_INTERVAL/1000) * 16)
+    elif (not camera.recording) or is_frame_still:
+        delay_remove_frame.apply_async([frame.id], countdown=(settings.LIVE_INTERVAL/1000) * 16)
     else: print('Not saving frame')
     process_live.apply_async([camera.id, frame.id], countdown=(settings.LIVE_INTERVAL/1000) * 12)
     return frame.confirmation_id
