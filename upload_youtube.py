@@ -16,8 +16,8 @@ from better_profanity import profanity
 count = 0
 for recording in VideoRecording.objects.filter(processed=True, uploaded=False).order_by('-last_frame'):
     cameras = VideoCamera.objects.filter(name=recording.camera, user=recording.user).order_by('-last_frame')
-    print(recording.camera)
-    print(cameras)
+    print(recording)
+#    print(cameras)
     camera = cameras.first()
     from live.duration import get_duration
     if camera.upload and get_duration(recording.file.path) > settings.LIVE_INTERVAL/1000 * 1.5:

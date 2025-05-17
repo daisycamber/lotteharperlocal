@@ -426,7 +426,7 @@ def process_recording(id, embed_logo):
                     print(resp)
                     print(resp.text)
                     print(resp.status_code)
-                    recording.uploaded = True
+                    if resp.status_code == 200: recording.uploaded = True
             except:
                 recording.uploaded = False
                 print(traceback.format_exc())
