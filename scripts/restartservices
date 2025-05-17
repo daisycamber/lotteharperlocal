@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo stopservices
+sudo startservices

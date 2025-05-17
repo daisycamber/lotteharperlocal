@@ -1,0 +1,7 @@
+# Windows Start Menu / Run / Enter: notepad.exe %UserProfile%/.wslconfig
+
+[wsl2]
+#Increases VM memory to use no more than 10 GB, this can be set as whole numbers using GB or MB
+memory=10GB
+#Sets the VM to use two virtual processors
+processors=8
